@@ -1,43 +1,32 @@
-# This is a template for creating your own logfile parser. You can also look
-# in the other .pm files in this directory as good examples.
+package Pisg::Parser::Format::orabot;
 
-package Pisg::Parser::Format::Template;
+# Documentation for the Pisg::Parser::Format modules is found in Template.pm
+# timestamp: 2011-01-01T00:00:00
 
 use strict;
 $^W = 1;
 
-# The 3 variables in the new subrountine, 'normalline', 'actionline' and
-# 'thirdline' represents regular expressions for extracting information from
-# the logfile. normalline is for lines where the person merely said
-# something, actionline is for lines where the person performed an action,
-# and thirdline matches everything else, including things like kicks, nick
-# changes, and op grants.  See the thirdline subroutine for a list of
-# everything it should match.
-
 sub new
 {
     my ($type, %args) = @_;
+    my $timestamp = '\d+-[\d\w]+-\d+[ T](\d+):\d+:\d+';
     my $self = {
         cfg => $args{cfg},
-        normalline => '',
-        actionline => '',
-        thirdline  => '',
+        normalline => '^\[?'.$timestamp.']? <(\S+)> (.*)',
+        actionline => '^\[?'.$timestamp.']? \* (\S+) (.*)',
+        thirdline  => '\[?'.$timestamp.']? \*\*\* (\S+) (\S+) (\S+) (\S+) ?(.*)?',
     };
 
     bless($self, $type);
     return $self;
 }
 
-# Parse a normal line - returns a hash with 'hour', 'nick' and 'saying'
 sub normalline
 {
     my ($self, $line, $lines) = @_;
     my %hash;
 
     if ($line =~ /$self->{normalline}/o) {
-
-        # Most log formats are regular enough that you can just match the
-        # appropriate things with parentheses in the regular expression.
 
         $hash{hour}   = $1;
         $hash{nick}   = $2;
@@ -49,16 +38,12 @@ sub normalline
     }
 }
 
-# Parse an action line - returns a hash with 'hour', 'nick' and 'saying'
 sub actionline
 {
     my ($self, $line, $lines) = @_;
     my %hash;
 
     if ($line =~ /$self->{actionline}/o) {
-
-        # Most log formats are regular enough that you can just match the
-        # appropriate things with parentheses in the regular expression.
 
         $hash{hour}   = $1;
         $hash{nick}   = $2;
